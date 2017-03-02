@@ -76,7 +76,8 @@ export enum ReflectionFlag {
     Optional = 128,
     DefaultValue = 256,
     Rest = 512,
-    ConstructorProperty = 1024
+    ConstructorProperty = 1024,
+    DefaultExport = 2048
 }
 
 const relevantFlags: ReflectionFlag[] = [
@@ -86,7 +87,8 @@ const relevantFlags: ReflectionFlag[] = [
     ReflectionFlag.ExportAssignment,
     ReflectionFlag.Optional,
     ReflectionFlag.DefaultValue,
-    ReflectionFlag.Rest
+    ReflectionFlag.Rest,
+    ReflectionFlag.DefaultExport
 ];
 
 export interface ReflectionFlags extends Array<string> {
@@ -140,6 +142,8 @@ export interface ReflectionFlags extends Array<string> {
     hasExportAssignment?: boolean;
 
     isConstructorProperty?: boolean;
+
+    isDefaultExport?: boolean;
 }
 
 export interface DefaultValueContainer extends Reflection {
@@ -404,6 +408,9 @@ export abstract class Reflection {
                 break;
             case ReflectionFlag.ConstructorProperty:
                 this.flags.isConstructorProperty = value;
+                break;
+            case ReflectionFlag.DefaultExport:
+                this.flags.isDefaultExport = value;
                 break;
         }
     }

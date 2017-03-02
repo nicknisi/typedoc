@@ -64,6 +64,8 @@ export function createDeclaration(context: Context, node: ts.Node, kind: Reflect
         return null;
     }
 
+    const isDefaultExport = !!(modifiers & ts.ModifierFlags.Export && modifiers & ts.ModifierFlags.Default);
+
     // Test whether the node is private, when inheriting ignore private members
     const isPrivate = !!(modifiers & ts.ModifierFlags.Private);
     if (context.isInherit && isPrivate) {
@@ -100,6 +102,7 @@ export function createDeclaration(context: Context, node: ts.Node, kind: Reflect
         child.setFlag(ReflectionFlag.Private, isPrivate);
         child.setFlag(ReflectionFlag.ConstructorProperty, isConstructorProperty);
         child.setFlag(ReflectionFlag.Exported,  isExported);
+        child.setFlag(ReflectionFlag.DefaultExport,  isDefaultExport);
         child = setupDeclaration(context, child, node);
 
         if (child) {

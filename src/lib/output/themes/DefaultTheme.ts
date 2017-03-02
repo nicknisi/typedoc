@@ -458,14 +458,15 @@ export class DefaultTheme extends Theme {
             hasTypeParameters = hasTypeParameters || !!signature.typeParameters;
         });
 
-        if (hasTypeParameters)            { classes.push('tsd-has-type-parameter'); }
-        if (reflection.overwrites)        { classes.push('tsd-is-overwrite'); }
-        if (reflection.inheritedFrom)     { classes.push('tsd-is-inherited'); }
-        if (reflection.flags.isPrivate)   { classes.push('tsd-is-private'); }
-        if (reflection.flags.isProtected) { classes.push('tsd-is-protected'); }
-        if (reflection.flags.isStatic)    { classes.push('tsd-is-static'); }
-        if (reflection.flags.isExternal)  { classes.push('tsd-is-external'); }
-        if (!reflection.flags.isExported) { classes.push('tsd-is-not-exported'); }
+        if (hasTypeParameters)                { classes.push('tsd-has-type-parameter'); }
+        if (reflection.overwrites)            { classes.push('tsd-is-overwrite'); }
+        if (reflection.inheritedFrom)         { classes.push('tsd-is-inherited'); }
+        if (reflection.flags.isPrivate)       { classes.push('tsd-is-private'); }
+        if (reflection.flags.isProtected)     { classes.push('tsd-is-protected'); }
+        if (reflection.flags.isStatic)        { classes.push('tsd-is-static'); }
+        if (reflection.flags.isExternal)      { classes.push('tsd-is-external'); }
+        if (reflection.flags.isDefaultExport) { classes.push('tsd-is-default-export'); }
+        if (!reflection.flags.isExported)     { classes.push('tsd-is-not-exported'); }
 
         reflection.cssClasses = classes.join(' ');
     }
