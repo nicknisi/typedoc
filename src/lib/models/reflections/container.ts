@@ -1,3 +1,5 @@
+import * as ts from 'typescript';
+
 import {Reflection, ReflectionKind, TraverseCallback, TraverseProperty} from './abstract';
 import {ReflectionGroup} from '../ReflectionGroup';
 import {DeclarationReflection} from './declaration';
@@ -12,6 +14,8 @@ export class ContainerReflection extends Reflection {
      * All children grouped by their kind.
      */
     groups: ReflectionGroup[];
+
+    childrenMap: Map<ts.Symbol, DeclarationReflection> = new Map();
 
     /**
      * Return a list of all children of a certain kind.

@@ -1,3 +1,5 @@
+import * as ts from 'typescript';
+
 import {SourceFile, SourceDirectory} from '../sources/index';
 import {Reflection, ReflectionKind} from './abstract';
 import {ContainerReflection} from './container';
@@ -15,6 +17,8 @@ export class ProjectReflection extends ContainerReflection {
     reflections: {[id: number]: Reflection} = {};
 
     symbolMapping: {[symbolId: number]: number} = {};
+
+    symbolMap: Map<ts.Symbol, Reflection> = new Map();
 
     /**
      * The root directory of the project.
