@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
-import { createDeclaration, DeclarationReflection, ReflectionKind } from './declaration';
+import { createDeclaration, DeclarationReflection, ReflectionKind, addDeclarationComments } from './declaration';
+import { createSignature } from './signature';
 import { Context } from '../context';
 
 export function createFunction(context: Context, node: ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature): DeclarationReflection {
@@ -12,8 +13,10 @@ export function createFunction(context: Context, node: ts.FunctionDeclaration | 
     context.withScope(func, context => {
         if (!(node as any).body || !func.signatures) {
             func.signatures = func.signatures || [];
-            // TODO: signatures
-            // const funcContext = context.forScope(func);
+            const signature = createSignature(context, <ts.SignatureDeclaration> node, func.name, ReflectionKind.CallSignature);
+            func.signatures.push(signature);
+        } else {
+            addDeclarationComments(func, node);
         }
     });
 

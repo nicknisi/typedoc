@@ -19,7 +19,7 @@ export function getComment(node: ts.Node, comment?: Comment): Comment | undefine
 
         comment.tags = (comment.tags || []);
 
-        node.jsDoc.forEach(docNode => {
+        node.jsDoc && node.jsDoc.forEach(docNode => {
             if (!docNode.tags) {
                 return;
             }
@@ -64,6 +64,7 @@ function removeTags(comment: Comment, tagName: string) {
 }
 
 export function applyCommentModifiers(reflection: Reflection, comment: Comment) {
+    if (!comment) { return; } // TODO: look closer at this
     if (comment.hasTag('private')) {
         reflection.setFlag(ReflectionFlag.Private);
         removeTags(comment, 'private');

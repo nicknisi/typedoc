@@ -83,4 +83,8 @@ declare module 'typescript' {
     export function getCommentsFromJSDoc(node: Node): string[];
     export function getSourceFileOfNode(node: Node): SourceFile;
     export function getJSDocCommentRanges(node: Node, text: string): CommentRange[];
+
+    export function getInterfaceBaseTypeNodes(node: InterfaceDeclaration);
+    export function declarationNameToString(name: DeclarationName): string;
+    export function getTextOfNode(node: Node, includeTrivia?: boolean): string;
 }

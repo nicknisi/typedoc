@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { ReflectionKind } from './declaration';
-import { SignatureReflection, ContainerReflection, DeclarationReflection, Type } from '../../models';
+import { Reflection, SignatureReflection, ContainerReflection, DeclarationReflection, Type } from '../../models';
 import { Context } from '../context';
 import { createParameter } from './parameter';
 import { createReferenceType } from './reference';
@@ -60,4 +60,41 @@ function extractSignatureType(context: Context, node: ts.SignatureDeclaration): 
     } else {
         return context.converter.convertType(context, node);
     }
+}
+
+/**
+ * Analyze the given call signature declaration node and create a suitable reflection.
+ *
+ * @param context  The context object describing the current state the converter is in.
+ * @param node     The signature declaration node that should be analyzed.
+ * @return The resulting reflection or NULL.
+ */
+export function createSignatureCall(context: Context, node: ts.FunctionExpression|ts.SignatureDeclaration|ts.FunctionDeclaration): Reflection {
+    const scope = <DeclarationReflection> context.scope;
+
+    if (scope instanceof DeclarationReflection) {
+        const name = scope.kindOf(ReflectionKind.FunctionOrMethod) ? scope.name : '__call';
+        const signature = createSignature(context, <ts.SignatureDeclaration> node, name, ReflectionKind.CallSignature);
+        scope.signatures = scope.signatures || [];
+        scope.signatures.push(signature);
+    }
+
+    return scope;
+}
+
+/**
+ * Analyze the given index signature declaration node and create a suitable reflection.
+ *
+ * @param context  The context object describing the current state the converter is in.
+ * @param node     The signature declaration node that should be analyzed.
+ * @return The resulting reflection or NULL.
+ */
+export function createIndexSignature(context: Context, node: ts.SignatureDeclaration): Reflection {
+    const scope = <DeclarationReflection> context.scope;
+
+    if (scope instanceof DeclarationReflection) {
+        scope.indexSignature = createSignature(context, node, '__index', ReflectionKind.IndexSignature);
+    }
+
+    return scope;
 }

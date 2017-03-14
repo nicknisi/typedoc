@@ -6,8 +6,12 @@ import { Reflection, Type, ProjectReflection } from '../models';
 import { Context } from './context';
 import { normalizePath } from '../utils/fs';
 
-import { createSourceFile, createClass, createDecorator, resolveDecorators, createFunction } from './factories';
+import { createSourceFile, createClass, createDecorator, resolveDecorators, createFunction, createInterface, createEnum, createObjectLiteral, createTypeLiteral, createModule, createSignatureCall, createIndexSignature, createVariable, createVariableStatement } from './factories';
 import { isExtendsClause, isImplementsClause } from './utils';
+
+import '../converter/nodes';
+import '../converter/types';
+// import * as plugins from '../converter/plugins';
 
 /**
  * Result structure of the [[Converter.convert]] method.
@@ -263,17 +267,18 @@ export class Converter extends EventDispatcher {
 
         this.trigger(Converter.EVENT_BEGIN, context);
 
+        debugger;
         this.program.getSourceFiles().forEach(sourceFile => {
             this.visit(sourceFile, context);
         });
         const errors = this.getErrors();
-        this.resolve(context);
+        const project = this.resolve(context);
 
         this.trigger(Converter.EVENT_END, context);
 
         return {
             errors,
-            project: this.project
+            project
         };
     }
 
@@ -312,12 +317,31 @@ export class Converter extends EventDispatcher {
      * @return The resulting reflection or NULL.
      */
     convertNode(context: Context, node: ts.Node): Reflection {
+        // TODO: look into why `as any`
         if (ts.isSourceFile(node)) {
             return createSourceFile(context, node, this.options.mode !== SourceFileMode.File);
         } else if (ts.isClassLike(node)) {
             return createClass(context, node as any);
         } else if (ts.isMethodDeclaration(node) || node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.MethodSignature) {
             return createFunction(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+            return createInterface(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.EnumDeclaration) {
+            return createEnum(context, node as any);
+        } else if (ts.isObjectLiteralExpression(node)) {
+            return createObjectLiteral(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.TypeLiteral) {
+            return createTypeLiteral(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
+            return createModule(context, node as any);
+        } else if ([ts.SyntaxKind.CallSignature, ts.SyntaxKind.FunctionType, ts.SyntaxKind.FunctionExpression, ts.SyntaxKind.ArrowFunction].find(kind => kind === node.kind)) {
+            return createSignatureCall(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.IndexSignature) {
+            return createIndexSignature(context, node as any);
+        } else if ([ts.SyntaxKind.PropertySignature, ts.SyntaxKind.PropertyDeclaration, ts.SyntaxKind.PropertyAssignment, ts.SyntaxKind.ShorthandPropertyAssignment, ts.SyntaxKind.VariableDeclaration, ts.SyntaxKind.BindingElement].find(kind => kind === node.kind)) {
+            return createVariable(context, node as any);
+        } else if (node.kind === ts.SyntaxKind.VariableStatement) {
+            return createVariableStatement(context, node as any);
         }
         return null;
     }
@@ -386,7 +410,7 @@ export class Converter extends EventDispatcher {
      *
      * @param context  The context object describing the current state the converter is in.
      */
-    private resolve(context: Context) {
+    private resolve(context: Context): ProjectReflection {
         this.trigger(Converter.EVENT_RESOLVE_BEGIN, context);
         const project = context.project;
 
@@ -400,6 +424,7 @@ export class Converter extends EventDispatcher {
         resolveDecorators(this);
 
         this.trigger(Converter.EVENT_RESOLVE_END, context);
+        return project;
     }
 
     /**
