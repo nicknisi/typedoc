@@ -11,7 +11,7 @@ import * as FS from 'fs';
 import * as typescript from 'typescript';
 import {Minimatch, IMinimatch} from 'minimatch';
 
-import {Converter, SourceFileMode} from './converter/index';
+import {Converter, SourceFileMode} from './converter-new/index';
 import {Renderer} from './output/renderer';
 import {ProjectReflection} from './models/index';
 import {Logger, ConsoleLogger, CallbackLogger, PluginHost, writeFile} from './utils/index';
@@ -180,6 +180,7 @@ export class Application extends ChildableComponent<Application, AbstractCompone
 
         this.converter = new Converter({
             compilerOptions: this.options.getCompilerOptions(),
+            fileNames: this.expandInputFiles(readResult.inputFiles),
             name: this.name,
             excludeExternals: this.excludeExternals,
             excludeNotExported: this.excludeNotExported,
@@ -223,10 +224,10 @@ export class Application extends ChildableComponent<Application, AbstractCompone
      * @param src  A list of source that should be compiled and converted.
      * @returns An instance of ProjectReflection on success, NULL otherwise.
      */
-    public convert(src: string[]): ProjectReflection {
+    public convert(): ProjectReflection {
         this.logger.writeln('Using TypeScript %s from %s', this.getTypeScriptVersion(), this.getTypeScriptPath());
 
-        const result = this.converter.convert(src);
+        const result = this.converter.convert();
         if (result.errors && result.errors.length) {
             this.logger.diagnostics(result.errors);
             if (this.ignoreCompilerErrors) {
@@ -257,7 +258,7 @@ export class Application extends ChildableComponent<Application, AbstractCompone
      * @returns TRUE if the documentation could be generated successfully, otherwise FALSE.
      */
     public generateDocs(input: any, out: string): boolean {
-        const project = input instanceof ProjectReflection ? input : this.convert(input);
+        const project = input instanceof ProjectReflection ? input : this.convert();
         if (!project) {
             return false;
         }
@@ -290,7 +291,7 @@ export class Application extends ChildableComponent<Application, AbstractCompone
      * @returns TRUE if the json file could be written successfully, otherwise FALSE.
      */
     public generateJson(input: any, out: string): boolean {
-        const project = input instanceof ProjectReflection ? input : this.convert(input);
+        const project = input instanceof ProjectReflection ? input : this.convert();
         if (!project) {
             return false;
         }
