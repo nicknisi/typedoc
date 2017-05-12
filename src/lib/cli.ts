@@ -5,6 +5,8 @@ import {Option} from './utils/component';
 import {OptionsReadResult} from './utils/options/options';
 import {ParameterHint, ParameterType} from './utils/options/declaration';
 import {getOptionsHelp} from './utils/options/help';
+import '../td';
+import { serialize } from 'serializr';
 
 export const enum ExitCode {
     OptionError  = 1,
@@ -68,6 +70,9 @@ export class CliApplication extends Application {
         } else {
             const src = this.expandInputFiles(result.inputFiles);
             const project = this.convert(src);
+            // console.log(serialize(project));
+            const s = serialize(project);
+            console.log(s);
             if (project) {
                 if (this.out) {
                     this.generateDocs(project, this.out);
